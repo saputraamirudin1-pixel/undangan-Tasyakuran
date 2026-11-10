@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembuat Undangan Digital - Pernikahan & Khitanan</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Great+Vibes&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Font styles */
+    .font-serif-custom { font-family: 'Cinzel', serif; }
+    .font-cursive { font-family: 'Great Vibes', cursive; }
+    .font-sans-custom { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-playful { font-family: 'Fredoka', cursive; }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c5a880;
+      border-radius: 10px;
+    }
+
+    /* Animation effects */
+    @keyframes pulse-slow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .animate-pulse-slow {
+      animation: pulse-slow 3s infinite ease-in-out;
+    }
+
+    /* Envelope animation */
+    .envelope-cover {
+      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 font-sans-custom text-slate-800 antialiased h-screen overflow-hidden">
+
+  <!-- Main Container Layout -->
+  <div class="flex flex-col lg:flex-row h-full">
+
+    <!-- LEFT SIDE: CONTROLLER / EDITOR FORM -->
+    <div class="w-full lg:w-5/12 xl:w-4/12 h-full bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl">
+      <!-- Header Admin -->
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid me-2 fa-envelope-open-text text-amber-400 text-xl"></i>
+          <h1 class="font-bold text-lg">Maker Undangan Digital</h1>
+        </div>
+        <button id="btnExport" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1.5 shadow">
+          <i class="fa-solid fa-download"></i> Simpan / Unduh
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex border-b border-slate-200 bg-slate-50 text-xs font-semibold text-slate-600">
+        <button onclick="switchTab('tab-tipe')" class="tab-btn flex-1 py-3 text-center border-b-2 border-amber-500 text-amber-600 bg-white" data-target="tab-tipe">
+          <i class="fa-solid fa-sliders block text-base mb-1"></i> Tipe & Tema
+        </button>
+        <button onclick="switchTab('tab-acara')" class="tab-btn flex-1 py-3 text-center border-b-2 border-transparent hover:text-slate-900" data-target="tab-acara">
+          <i class="fa-solid fa-calendar-heart block text-base mb-1"></i> Detail Acara
+        </button>
+        <button onclick="switchTab('tab-mempelai')" class="tab-btn flex-1 py-3 text-center border-b-2 border-transparent hover:text-slate-900" data-target="tab-mempelai">
+          <i class="fa-solid fa-users block text-base mb-1"></i> Tokoh Utama
+        </button>
+        <button onclick="switchTab('tab-fitur')" class="tab-btn flex-1 py-3 text-center border-b-2 border-transparent hover:text-slate-900" data-target="tab-fitur">
+          <i class="fa-solid fa-gift block text-base mb-1"></i> Kado & Fitur
+        </button>
+      </div>
+
+      <!-- Form Content (Scrollable) -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-6">
+        
+        <!-- TAB 1: TIPE & TEMA -->
+        <div id="tab-tipe" class="tab-content space-y-5">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Jenis Acara</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="border-2 border-amber-500 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer bg-amber-50/50 hover:bg-amber-50 transition text-center" id="lbl-wedding">
+                <input type="radio" name="eventType" value="wedding" class="sr-only" checked onchange="updateFormState()">
+                <i class="fa-solid fa-heart text-rose-500 text-2xl mb-1"></i>
+                <span class="font-semibold text-sm">Pernikahan</span>
+              </label>
+              <label class="border-2 border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition text-center" id="lbl-khitan">
+                <input type="radio" name="eventType" value="khitan" class="sr-only" onchange="updateFormState()">
+                <i class="fa-solid fa-child text-emerald-500 text-2xl mb-1"></i>
+                <span class="font-semibold text-sm">Khitanan</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Pilih Tema Desain (10 Pilihan)</label>
+            <div class="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+              <!-- 1. Classic Floral -->
+              <button type="button" onclick="setTheme('theme-classic')" class="theme-btn border-2 border-amber-500 rounded-lg p-2 text-center text-xs font-medium hover:border-amber-600 bg-amber-50" data-theme="theme-classic">
+                <div class="h-7 rounded bg-gradient-to-r from-amber-100 to-amber-200 mb-1 border border-amber-300"></div>
+                Classic Floral
+              </button>
+              <!-- 2. Luxury Dark -->
+              <button type="button" onclick="setTheme('theme-dark')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-slate-400 bg-slate-900 text-white" data-theme="theme-dark">
+                <div class="h-7 rounded bg-gradient-to-r from-slate-800 to-amber-900 mb-1 border border-amber-600"></div>
+                Luxury Dark
+              </button>
+              <!-- 3. Green Islamic -->
+              <button type="button" onclick="setTheme('theme-islamic')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-emerald-500 bg-emerald-50 text-emerald-900" data-theme="theme-islamic">
+                <div class="h-7 rounded bg-gradient-to-r from-emerald-100 to-teal-200 mb-1 border border-emerald-300"></div>
+                Green Islamic
+              </button>
+              <!-- 4. Minimalist Clean -->
+              <button type="button" onclick="setTheme('theme-minimalist')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-slate-400 bg-slate-50 text-slate-800" data-theme="theme-minimalist">
+                <div class="h-7 rounded bg-gradient-to-r from-slate-100 to-slate-200 mb-1 border border-slate-300"></div>
+                Minimalist Clean
+              </button>
+              <!-- 5. Bohemian Earth -->
+              <button type="button" onclick="setTheme('theme-boho')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-stone-500 bg-stone-100 text-stone-800" data-theme="theme-boho">
+                <div class="h-7 rounded bg-gradient-to-r from-stone-200 to-orange-100 mb-1 border border-stone-300"></div>
+                Bohemian Earth
+              </button>
+              <!-- 6. Rustic Wood -->
+              <button type="button" onclick="setTheme('theme-rustic')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-amber-800 bg-amber-900 text-amber-100" data-theme="theme-rustic">
+                <div class="h-7 rounded bg-gradient-to-r from-amber-800 to-yellow-950 mb-1 border border-amber-600"></div>
+                Rustic Wood
+              </button>
+              <!-- 7. Pastel Dream -->
+              <button type="button" onclick="setTheme('theme-pastel')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-pink-400 bg-pink-50 text-pink-900" data-theme="theme-pastel">
+                <div class="h-7 rounded bg-gradient-to-r from-pink-100 to-rose-200 mb-1 border border-pink-300"></div>
+                Pastel Dream
+              </button>
+              <!-- 8. Royal Gold -->
+              <button type="button" onclick="setTheme('theme-royal')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-yellow-500 bg-yellow-50 text-yellow-950" data-theme="theme-royal">
+                <div class="h-7 rounded bg-gradient-to-r from-yellow-200 to-amber-300 mb-1 border border-yellow-500"></div>
+                Royal Gold
+              </button>
+              <!-- 9. Ocean Breeze -->
+              <button type="button" onclick="setTheme('theme-ocean')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-cyan-500 bg-cyan-50 text-cyan-900" data-theme="theme-ocean">
+                <div class="h-7 rounded bg-gradient-to-r from-sky-100 to-cyan-200 mb-1 border border-cyan-300"></div>
+                Ocean Breeze
+              </button>
+              <!-- 10. Neon Modern -->
+              <button type="button" onclick="setTheme('theme-neon')" class="theme-btn border-2 border-slate-200 rounded-lg p-2 text-center text-xs font-medium hover:border-indigo-500 bg-indigo-950 text-indigo-100" data-theme="theme-neon">
+                <div class="h-7 rounded bg-gradient-to-r from-indigo-900 to-purple-900 mb-1 border border-pink-500"></div>
+                Neon Modern
+              </button>
+            </div>
+          </div>
+
+          <!-- PENGATURAN MUSIK / AUDIO LATAR CUSTOM -->
+          <div class="p-3 bg-slate-50 border rounded-xl space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-slate-700"><i class="fa-solid fa-music text-amber-600 me-1"></i> Musik Latar (Backsound)</label>
+              <button type="button" onclick="toggleAudioPreview()" id="btn-preview-audio" class="text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold px-2 py-0.5 rounded flex items-center gap-1 transition">
+                <i class="fa-solid fa-play text-[10px]" id="icon-preview-audio"></i> Putar Tes
+              </button>
+            </div>
+
+            <!-- Option 1: Preset Pilihan Musik -->
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-1">Pilih Lagu Preset</label>
+              <select id="select-preset-bgm" onchange="applyPresetAudio(this.value)" class="w-full text-xs p-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-amber-500">
+                <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=acoustic-wedding-background-music-112836.mp3">Akustik Romantis Pernikahan</option>
+                <option value="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939b6e82a.mp3?filename=soft-piano-background-music-123472.mp3">Piano Syahdu & Soft</option>
+                <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c87140e6.mp3?filename=islamic-background-music-10874.mp3">Instrumen Islami / Religi</option>
+                <option value="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=happy-fun-playful-14736.mp3">Ceria / Playful (Khitanan)</option>
+              </select>
+            </div>
+
+            <!-- Option 2: Upload File MP3 -->
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Upload File Musik Sendiri (MP3)</label>
+              <div class="flex items-center gap-2">
+                <input type="file" id="file-bgm" accept="audio/*" class="hidden" onchange="handleAudioUpload(event)">
+                <button type="button" onclick="document.getElementById('file-bgm').click()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-upload"></i> Unggah Berkas MP3
+                </button>
+                <span id="audio-file-name" class="text-[11px] text-slate-500 truncate max-w-[150px]">Belum ada berkas</span>
+              </div>
+            </div>
+
+            <!-- Option 3: Manual Input URL -->
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-1">Atau Gunakan Link URL Audio Direct</label>
+              <input type="text" id="in-bgm" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:outline-none" placeholder="https://domain.com/musik.mp3" value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=acoustic-wedding-background-music-112836.mp3">
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: DETAIL ACARA -->
+        <div id="tab-acara" class="tab-content hidden space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Judul Undangan / Salam</label>
+            <input type="text" id="in-title" class="w-full text-xs p-2.5 border rounded-lg" value="Walimatul 'Ursy / Syukuran Khitan">
+          </div>
+
+          <div class="p-3 bg-slate-50 border rounded-xl space-y-3">
+            <span class="text-xs font-bold text-amber-700 block"><i class="fa-solid fa-ring"></i> Acara Utama (Akad / Walimah)</span>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500">Tanggal & Waktu</label>
+              <input type="datetime-local" id="in-date-main" class="w-full text-xs p-2 border rounded-lg" value="2026-12-25T08:00">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500">Nama Tempat / Gedung</label>
+              <input type="text" id="in-place-main" class="w-full text-xs p-2 border rounded-lg" value="Masjid Agung & Kediaman Mempeli">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500">Alamat Lengkap</label>
+              <textarea id="in-address-main" rows="2" class="w-full text-xs p-2 border rounded-lg">Jl. Merdeka No. 123, Jakarta Selatan</textarea>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-50 border rounded-xl space-y-3">
+            <span class="text-xs font-bold text-slate-700 block"><i class="fa-solid fa-champagne-glasses"></i> Acara Resepsi / Syukuran</span>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500">Waktu Pelaksanaan</label>
+              <input type="text" id="in-time-resepsi" class="w-full text-xs p-2 border rounded-lg" value="11.00 WIB - Selesai">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500">Link Google Maps (URL)</label>
+              <input type="text" id="in-maps-url" class="w-full text-xs p-2 border rounded-lg" placeholder="https://maps.google.com/..." value="https://maps.google.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: TOKOH UTAMA -->
+        <div id="tab-mempelai" class="tab-content hidden space-y-4">
+          <!-- Form Pengantin 1 / Anak Khitan -->
+          <div class="p-3 bg-slate-50 border rounded-xl space-y-2">
+            <span class="text-xs font-bold text-slate-700 block" id="lbl-person1-title">Mempelai Pria / Anak</span>
+            <div>
+              <label class="block text-[11px] text-slate-500">Nama Lengkap</label>
+              <input type="text" id="in-p1-name" class="w-full text-xs p-2 border rounded-lg" value="Muhammad Rizky, S.T.">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Nama Panggilan</label>
+              <input type="text" id="in-p1-nick" class="w-full text-xs p-2 border rounded-lg" value="Rizky">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Keterangan Orang Tua</label>
+              <input type="text" id="in-p1-parents" class="w-full text-xs p-2 border rounded-lg" value="Putra dari Bpk. Ahmad & Ibu Siti">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Foto Mempelai 1 / Anak</label>
+              <div class="flex gap-2">
+                <input type="file" id="file-p1-photo" accept="image/*" class="hidden" onchange="handleFileUpload(event, 'in-p1-photo')">
+                <button type="button" onclick="document.getElementById('file-p1-photo').click()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-upload"></i> Upload Foto
+                </button>
+              </div>
+              <input type="text" id="in-p1-photo" class="w-full text-xs p-2 border rounded-lg mt-1.5" placeholder="Atau tempel URL foto di sini" value="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop">
+            </div>
+          </div>
+
+          <!-- Form Pengantin 2 (Khusus Pernikahan) -->
+          <div id="box-person2" class="p-3 bg-slate-50 border rounded-xl space-y-2">
+            <span class="text-xs font-bold text-slate-700 block">Mempelai Wanita</span>
+            <div>
+              <label class="block text-[11px] text-slate-500">Nama Lengkap</label>
+              <input type="text" id="in-p2-name" class="w-full text-xs p-2 border rounded-lg" value="Annisa Anindya, S.Kd.">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Nama Panggilan</label>
+              <input type="text" id="in-p2-nick" class="w-full text-xs p-2 border rounded-lg" value="Annisa">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Keterangan Orang Tua</label>
+              <input type="text" id="in-p2-parents" class="w-full text-xs p-2 border rounded-lg" value="Putri dari Bpk. Bambang & Ibu Sri">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Foto Mempelai Wanita</label>
+              <div class="flex gap-2">
+                <input type="file" id="file-p2-photo" accept="image/*" class="hidden" onchange="handleFileUpload(event, 'in-p2-photo')">
+                <button type="button" onclick="document.getElementById('file-p2-photo').click()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-upload"></i> Upload Foto
+                </button>
+              </div>
+              <input type="text" id="in-p2-photo" class="w-full text-xs p-2 border rounded-lg mt-1.5" placeholder="Atau tempel URL foto di sini" value="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop">
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: KADO & FITUR EXTRA -->
+        <div id="tab-fitur" class="tab-content hidden space-y-4">
+          <div class="p-3 bg-slate-50 border rounded-xl space-y-3">
+            <span class="text-xs font-bold text-slate-700 block"><i class="fa-solid fa-wallet"></i> Amplop Digital / Hadiah</span>
+            <div>
+              <label class="block text-[11px] text-slate-500">Nama Bank / E-Wallet</label>
+              <input type="text" id="in-bank-name" class="w-full text-xs p-2 border rounded-lg" value="BCA">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Nomor Rekening</label>
+              <input type="text" id="in-bank-no" class="w-full text-xs p-2 border rounded-lg" value="1234567890">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Atas Nama</label>
+              <input type="text" id="in-bank-holder" class="w-full text-xs p-2 border rounded-lg" value="Muhammad Rizky">
+            </div>
+          </div>
+
+          <!-- Integrasi WhatsApp untuk Konfirmasi RSVP -->
+          <div class="p-3 bg-slate-50 border rounded-xl space-y-3">
+            <span class="text-xs font-bold text-emerald-700 block"><i class="fa-brands fa-whatsapp"></i> Nomor WhatsApp Tujuan RSVP</span>
+            <div>
+              <label class="block text-[11px] text-slate-500">Nomor WA (contoh: 08123456789 atau 628123456789)</label>
+              <input type="text" id="in-wa-number" class="w-full text-xs p-2 border rounded-lg" value="08123456789">
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-50 border rounded-xl space-y-2">
+            <span class="text-xs font-bold text-slate-700 block"><i class="fa-solid fa-quote-left"></i> Kutipan / Doa (Quote)</span>
+            <textarea id="in-quote" rows="3" class="w-full text-xs p-2 border rounded-lg">"Dan di antara tanda-tanda (kebesaran-Nya) ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya."</textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Info -->
+      <div class="p-3 bg-slate-100 border-t text-center text-xs text-slate-500">
+        Pratinjau otomatis diperbarui secara live.
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: PREVIEW CONTAINER -->
+    <div class="w-full lg:w-7/12 xl:w-8/12 h-full bg-slate-800 flex items-center justify-center p-2 sm:p-6 overflow-hidden relative">
+      
+      <!-- Phone Mockup Wrapper -->
+      <div class="w-full max-w-[420px] h-[92vh] max-h-[850px] bg-white rounded-[36px] shadow-2xl overflow-hidden border-[8px] border-slate-900 relative flex flex-col">
+        
+        <!-- Phone Camera Notch -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-5 bg-slate-900 rounded-b-xl z-50 flex justify-center items-center">
+          <div class="w-3 h-3 rounded-full bg-slate-800"></div>
+        </div>
+
+        <!-- Invitation Live Render Screen -->
+        <div id="invitation-app" class="w-full h-full overflow-y-auto relative bg-amber-50 text-slate-800 theme-classic">
+
+          <!-- Audio Element -->
+          <audio id="audio-player" loop>
+            <source id="audio-source" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=acoustic-wedding-background-music-112836.mp3" type="audio/mpeg">
+          </audio>
+
+          <!-- Floating Music Button -->
+          <button id="btn-music" onclick="toggleAudio()" class="fixed bottom-5 right-5 z-40 w-10 h-10 rounded-full bg-amber-600 text-white shadow-lg flex items-center justify-center text-sm animate-pulse-slow hidden">
+            <i class="fa-solid fa-music"></i>
+          </button>
+
+          <!-- SECTION 1: COVER / SAMBUL OVERLAY -->
+          <section id="sec-cover" class="absolute inset-0 z-40 bg-amber-100/95 flex flex-col justify-between items-center text-center p-6 backdrop-blur-md transition-all duration-700">
+            <div class="mt-8">
+              <span id="view-cover-subtitle" class="text-xs uppercase tracking-widest text-amber-800 font-semibold">UNDANGAN PERNIKAHAN</span>
+              <h1 id="view-cover-title" class="font-cursive text-4xl text-amber-900 my-4 font-bold">Rizky & Annisa</h1>
+            </div>
+
+            <div class="my-auto w-full max-w-xs">
+              <div class="relative w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-amber-300 shadow-xl mb-4">
+                <img id="view-cover-img" src="https://images.unsplash.com/photo-1519741497674-611481863552?w=500&fit=crop" class="w-full h-full object-cover" alt="Cover Image">
+              </div>
+              <p class="text-xs text-slate-600 mb-1">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
+              <div class="bg-white/80 backdrop-blur rounded-lg p-2 font-semibold text-sm text-slate-800 shadow-sm border border-amber-200">
+                Tamu Undangan
+              </div>
+            </div>
+
+            <button onclick="openInvitation()" class="mb-6 bg-amber-700 hover:bg-amber-800 text-white font-medium px-6 py-2.5 rounded-full shadow-lg text-sm transition-all transform hover:scale-105 flex items-center gap-2">
+              <i class="fa-solid fa-envelope-open"></i> Buka Undangan
+            </button>
+          </section>
+
+          <!-- MAIN INVITATION CONTENT -->
+          <div id="main-content" class="min-h-full pb-16">
+            
+            <!-- HEADER HERO -->
+            <header class="py-12 px-6 text-center bg-gradient-to-b from-amber-200/40 to-transparent relative">
+              <div class="text-amber-800 text-sm font-serif-custom uppercase tracking-wider mb-2" id="view-header-sub">Walimatul 'Ursy</div>
+              <h2 id="view-main-title" class="font-cursive text-5xl text-amber-900 mb-4">Rizky & Annisa</h2>
+              <p id="view-main-date-str" class="text-xs font-semibold text-slate-600 tracking-wide">JUM'AT, 25 DESEMBER 2026</p>
+            </header>
+
+            <!-- QUOTE SECTION -->
+            <section class="px-6 py-4 text-center">
+              <div class="max-w-xs mx-auto italic text-xs text-slate-600 bg-white/60 p-4 rounded-xl border border-amber-100 shadow-sm">
+                <i class="fa-solid fa-quote-left text-amber-400 text-lg block mb-2"></i>
+                <span id="view-quote">"Dan di antara tanda-tanda (kebesaran-Nya) ialah Dia menciptakan pasangan-pasangan untukmu..."</span>
+              </div>
+            </section>
+
+            <!-- PROFILE SECTION (MEN / WOMEN / CHILD) -->
+            <section class="px-6 py-8 text-center space-y-6">
+              <!-- Profile 1 -->
+              <div class="flex flex-col items-center">
+                <img id="view-p1-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop" class="w-24 h-24 rounded-full object-cover border-2 border-amber-400 shadow-md mb-2" alt="Person 1">
+                <h3 id="view-p1-name" class="font-bold text-base text-slate-800">Muhammad Rizky, S.T.</h3>
+                <p id="view-p1-parents" class="text-xs text-slate-500 mt-0.5">Putra dari Bpk. Ahmad & Ibu Siti</p>
+              </div>
+
+              <!-- Separator / Ampersand (Hidden in Khitan) -->
+              <div id="view-ampersand" class="font-cursive text-3xl text-amber-600">&</div>
+
+              <!-- Profile 2 (Wedding Only) -->
+              <div id="view-p2-box" class="flex flex-col items-center">
+                <img id="view-p2-img" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop" class="w-24 h-24 rounded-full object-cover border-2 border-amber-400 shadow-md mb-2" alt="Person 2">
+                <h3 id="view-p2-name" class="font-bold text-base text-slate-800">Annisa Anindya, S.Kd.</h3>
+                <p id="view-p2-parents" class="text-xs text-slate-500 mt-0.5">Putri dari Bpk. Bambang & Ibu Sri</p>
+              </div>
+            </section>
+
+            <!-- COUNTDOWN TIMER -->
+            <section class="px-6 py-6 bg-amber-900 text-white text-center rounded-2xl mx-4 shadow-lg">
+              <h4 class="text-xs uppercase tracking-widest text-amber-200 mb-3 font-semibold">Hitung Mundur Acara</h4>
+              <div class="grid grid-cols-4 gap-2 text-center">
+                <div class="bg-black/20 p-2 rounded-lg">
+                  <span id="cd-days" class="block font-bold text-lg text-amber-300">00</span>
+                  <span class="text-[10px] text-slate-300">Hari</span>
+                </div>
+                <div class="bg-black/20 p-2 rounded-lg">
+                  <span id="cd-hours" class="block font-bold text-lg text-amber-300">00</span>
+                  <span class="text-[10px] text-slate-300">Jam</span>
+                </div>
+                <div class="bg-black/20 p-2 rounded-lg">
+                  <span id="cd-mins" class="block font-bold text-lg text-amber-300">00</span>
+                  <span class="text-[10px] text-slate-300">Menit</span>
+                </div>
+                <div class="bg-black/20 p-2 rounded-lg">
+                  <span id="cd-secs" class="block font-bold text-lg text-amber-300">00</span>
+                  <span class="text-[10px] text-slate-300">Detik</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- EVENT DETAILS -->
+            <section class="px-6 py-8 space-y-4">
+              <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm text-center">
+                <div class="w-10 h-10 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center mx-auto mb-2 text-lg">
+                  <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <h4 class="font-bold text-sm text-slate-800" id="view-event1-title">Akad Nikah / Acara Utama</h4>
+                <p id="view-event1-time" class="text-xs text-amber-800 font-semibold mt-1">08:00 WIB</p>
+                <p id="view-event1-place" class="text-xs text-slate-600 mt-2 font-medium">Masjid Agung & Kediaman Mempeli</p>
+                <p id="view-event1-address" class="text-[11px] text-slate-400 mt-1">Jl. Merdeka No. 123, Jakarta Selatan</p>
+              </div>
+
+              <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm text-center">
+                <div class="w-10 h-10 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center mx-auto mb-2 text-lg">
+                  <i class="fa-solid fa-utensils"></i>
+                </div>
+                <h4 class="font-bold text-sm text-slate-800">Resepsi / Syukuran</h4>
+                <p id="view-event2-time" class="text-xs text-amber-800 font-semibold mt-1">11.00 WIB - Selesai</p>
+                <a id="view-maps-btn" href="#" target="_blank" class="inline-flex items-center gap-1.5 mt-3 text-xs bg-slate-800 hover:bg-slate-900 text-white font-medium px-4 py-2 rounded-lg transition shadow">
+                  <i class="fa-solid fa-map-location-dot"></i> Buka Google Maps
+                </a>
+              </div>
+            </section>
+
+            <!-- DIGITAL GIFT / AMPLOP DIGITAL -->
+            <section class="px-6 py-6 bg-white border-t border-b border-amber-100">
+              <div class="text-center mb-4">
+                <h4 class="font-bold text-sm text-slate-800">Amplop Digital & Kado</h4>
+                <p class="text-[11px] text-slate-500">Bagi bapak/ibu/saudara/i yang ingin memberikan hadiah:</p>
+              </div>
+              <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 text-center">
+                <span id="view-bank-name" class="font-bold text-xs text-slate-700 uppercase block">BCA</span>
+                <span id="view-bank-no" class="font-mono text-base font-bold text-amber-900 my-1 block">1234567890</span>
+                <span id="view-bank-holder" class="text-xs text-slate-500 block">a.n Muhammad Rizky</span>
+                <button onclick="copyBankAcc()" class="mt-3 text-[11px] bg-amber-200 hover:bg-amber-300 text-amber-900 px-3 py-1 rounded font-semibold transition">
+                  <i class="fa-solid fa-copy"></i> Salin Rekening
+                </button>
+              </div>
+            </section>
+
+            <!-- RSVP & WISHES FORM -->
+            <section class="px-6 py-8">
+              <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm">
+                <h4 class="font-bold text-sm text-slate-800 text-center mb-4"><i class="fa-solid fa-paper-plane text-amber-600"></i> Konfirmasi Kehadiran & Ucapan</h4>
+                <form onsubmit="submitGuestBook(event)" class="space-y-3">
+                  <div>
+                    <input type="text" id="guest-name" required placeholder="Nama Anda" class="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  </div>
+                  <div>
+                    <select id="guest-status" class="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 text-slate-600">
+                      <option value="Hadir">Hadir</option>
+                      <option value="Tidak Hadir">Ragu / Tidak Hadir</option>
+                    </select>
+                  </div>
+                  <div>
+                    <textarea id="guest-msg" rows="3" required placeholder="Tulis ucapan & doa..." class="w-full text-xs p-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500"></textarea>
+                  </div>
+                  <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Kirim Ucapan via WhatsApp
+                  </button>
+                </form>
+
+                <!-- List Ucapan -->
+                <div id="wishes-list" class="mt-6 space-y-3 max-h-48 overflow-y-auto pr-1">
+                  <div class="bg-slate-50 p-2.5 rounded-lg border text-xs">
+                    <div class="flex justify-between font-bold text-slate-700">
+                      <span>Ahmad Subagja</span>
+                      <span class="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Hadir</span>
+                    </div>
+                    <p class="text-slate-600 text-[11px] mt-1">Selamat untuk agendanya! Semoga dilancarkan semua urusannya sampai hari H.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- FOOTER -->
+            <footer class="text-center py-6 text-[11px] text-slate-400 border-t border-slate-100">
+              <p>Terima Kasih Atas Doa & Restunya</p>
+              <p class="mt-1 font-semibold text-slate-500" id="view-footer-names">Rizky & Annisa</p>
+            </footer>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i> <span id="toast-msg">Pesan</span>
+  </div>
+
+  <script>
+    // Global State App Data
+    let appData = {
+      eventType: 'wedding', // 'wedding' or 'khitan'
+      theme: 'theme-classic',
+      title: "Walimatul 'Ursy",
+      bgmUrl: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=acoustic-wedding-background-music-112836.mp3",
+      mainDate: "2026-12-25T08:00",
+      mainPlace: "Masjid Agung & Kediaman Mempeli",
+      mainAddress: "Jl. Merdeka No. 123, Jakarta Selatan",
+      resepsiTime: "11.00 WIB - Selesai",
+      mapsUrl: "https://maps.google.com",
+      p1Name: "Muhammad Rizky, S.T.",
+      p1Nick: "Rizky",
+      p1Parents: "Putra dari Bpk. Ahmad & Ibu Siti",
+      p1Photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop",
+      p2Name: "Annisa Anindya, S.Kd.",
+      p2Nick: "Annisa",
+      p2Parents: "Putri dari Bpk. Bambang & Ibu Sri",
+      p2Photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop",
+      bankName: "BCA",
+      bankNo: "1234567890",
+      bankHolder: "Muhammad Rizky",
+      waNumber: "08123456789",
+      quote: '"Dan di antara tanda-tanda (kebesaran-Nya) ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri..."'
+    };
+
+    let countdownInterval = null;
+    let isAudioPlaying = false;
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      bindInputs();
+      updateFormState();
+      updatePreview();
+      startCountdown();
+    });
+
+    // File Upload Audio Handler (Converts audio file to Base64 Data URL)
+    function handleAudioUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        if (file.size > 10 * 1024 * 1024) {
+          showToast("Ukuran audio maksimal 10 MB!");
+          return;
+        }
+        document.getElementById('audio-file-name').textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64Audio = e.target.result;
+          document.getElementById('in-bgm').value = base64Audio;
+          readFormData();
+          updatePreview();
+          showToast("Audio custom berhasil diunggah!");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Apply Audio from Preset dropdown
+    function applyPresetAudio(url) {
+      document.getElementById('in-bgm').value = url;
+      document.getElementById('audio-file-name').textContent = "Pilihan Preset";
+      readFormData();
+      updatePreview();
+      showToast("Musik dipasang!");
+    }
+
+    // Toggle Audio Preview in Editor Panel
+    function toggleAudioPreview() {
+      const audio = document.getElementById('audio-player');
+      const icon = document.getElementById('icon-preview-audio');
+      const btn = document.getElementById('btn-preview-audio');
+
+      if (audio.paused) {
+        audio.play().then(() => {
+          isAudioPlaying = true;
+          icon.className = "fa-solid fa-pause text-[10px]";
+          btn.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i> Jeda Tes`;
+        }).catch(() => {
+          showToast("Gagal memutar audio!");
+        });
+      } else {
+        audio.pause();
+        isAudioPlaying = false;
+        btn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> Putar Tes`;
+      }
+    }
+
+    // File Upload Handler (Converts file to Base64 Data URL)
+    function handleFileUpload(event, targetInputId) {
+      const file = event.target.files[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          showToast("Ukuran foto maksimal 5 MB!");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64Url = e.target.result;
+          document.getElementById(targetInputId).value = base64Url;
+          readFormData();
+          updatePreview();
+          showToast("Foto berhasil diunggah!");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Navigation Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('border-amber-500', 'text-amber-600', 'bg-white');
+        el.classList.add('border-transparent');
+      });
+
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.querySelector(`[data-target="${tabId}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('border-amber-500', 'text-amber-600', 'bg-white');
+        activeBtn.classList.remove('border-transparent');
+      }
+    }
+
+    // Input Events Binding
+    function bindInputs() {
+      const inputs = [
+        'in-title', 'in-bgm', 'in-date-main', 'in-place-main', 'in-address-main',
+        'in-time-resepsi', 'in-maps-url', 'in-p1-name', 'in-p1-nick', 'in-p1-parents',
+        'in-p1-photo', 'in-p2-name', 'in-p2-nick', 'in-p2-parents', 'in-p2-photo',
+        'in-bank-name', 'in-bank-no', 'in-bank-holder', 'in-wa-number', 'in-quote'
+      ];
+
+      inputs.forEach(id => {
+        const inputEl = document.getElementById(id);
+        if (inputEl) {
+          inputEl.addEventListener('input', () => {
+            readFormData();
+            updatePreview();
+          });
+        }
+      });
+    }
+
+    function readFormData() {
+      appData.eventType = document.querySelector('input[name="eventType"]:checked').value;
+      appData.title = document.getElementById('in-title').value;
+      appData.bgmUrl = document.getElementById('in-bgm').value;
+      appData.mainDate = document.getElementById('in-date-main').value;
+      appData.mainPlace = document.getElementById('in-place-main').value;
+      appData.mainAddress = document.getElementById('in-address-main').value;
+      appData.resepsiTime = document.getElementById('in-time-resepsi').value;
+      appData.mapsUrl = document.getElementById('in-maps-url').value;
+      
+      appData.p1Name = document.getElementById('in-p1-name').value;
+      appData.p1Nick = document.getElementById('in-p1-nick').value;
+      appData.p1Parents = document.getElementById('in-p1-parents').value;
+      appData.p1Photo = document.getElementById('in-p1-photo').value;
+
+      appData.p2Name = document.getElementById('in-p2-name').value;
+      appData.p2Nick = document.getElementById('in-p2-nick').value;
+      appData.p2Parents = document.getElementById('in-p2-parents').value;
+      appData.p2Photo = document.getElementById('in-p2-photo').value;
+
+      appData.bankName = document.getElementById('in-bank-name').value;
+      appData.bankNo = document.getElementById('in-bank-no').value;
+      appData.bankHolder = document.getElementById('in-bank-holder').value;
+      appData.waNumber = document.getElementById('in-wa-number').value;
+      appData.quote = document.getElementById('in-quote').value;
+    }
+
+    // Toggle Form Layout based on Event Type (Wedding vs Khitan)
+    function updateFormState() {
+      const type = document.querySelector('input[name="eventType"]:checked').value;
+      appData.eventType = type;
+
+      const p2Box = document.getElementById('box-person2');
+      const lblP1Title = document.getElementById('lbl-person1-title');
+      const lblWedding = document.getElementById('lbl-wedding');
+      const lblKhitan = document.getElementById('lbl-khitan');
+
+      if (type === 'khitan') {
+        p2Box.classList.add('hidden');
+        lblP1Title.textContent = "Anak Yang Dikhitan";
+        lblKhitan.classList.add('border-amber-500', 'bg-amber-50/50');
+        lblKhitan.classList.remove('border-slate-200');
+        lblWedding.classList.remove('border-amber-500', 'bg-amber-50/50');
+        lblWedding.classList.add('border-slate-200');
+
+        // Update default values for khitan if unchanged
+        if(document.getElementById('in-title').value.includes('Ursy')) {
+          document.getElementById('in-title').value = "Syukuran Khitanan";
+        }
+      } else {
+        p2Box.classList.remove('hidden');
+        lblP1Title.textContent = "Mempelai Pria";
+        lblWedding.classList.add('border-amber-500', 'bg-amber-50/50');
+        lblWedding.classList.remove('border-slate-200');
+        lblKhitan.classList.remove('border-amber-500', 'bg-amber-50/50');
+        lblKhitan.classList.add('border-slate-200');
+      }
+
+      readFormData();
+      updatePreview();
+    }
+
+    // Set Active Visual Theme
+    function setTheme(themeName) {
+      appData.theme = themeName;
+      const app = document.getElementById('invitation-app');
+      
+      // Reset classes & set base layout
+      app.className = `w-full h-full overflow-y-auto relative ${themeName}`;
+
+      // Update button active state indicator in UI editor
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        if (btn.getAttribute('data-theme') === themeName) {
+          btn.classList.add('border-amber-500', 'ring-2', 'ring-amber-300');
+          btn.classList.remove('border-slate-200');
+        } else {
+          btn.classList.remove('border-amber-500', 'ring-2', 'ring-amber-300');
+          btn.classList.add('border-slate-200');
+        }
+      });
+
+      // Dynamic style classes based on 10 themes
+      switch (themeName) {
+        case 'theme-dark':
+          app.classList.add('bg-slate-900', 'text-slate-100');
+          break;
+        case 'theme-islamic':
+          app.classList.add('bg-emerald-50', 'text-emerald-950');
+          break;
+        case 'theme-minimalist':
+          app.classList.add('bg-slate-50', 'text-slate-900');
+          break;
+        case 'theme-boho':
+          app.classList.add('bg-stone-100', 'text-stone-900');
+          break;
+        case 'theme-rustic':
+          app.classList.add('bg-amber-950', 'text-amber-50');
+          break;
+        case 'theme-pastel':
+          app.classList.add('bg-pink-50', 'text-slate-800');
+          break;
+        case 'theme-royal':
+          app.classList.add('bg-gradient-to-b', 'from-amber-100', 'to-yellow-50', 'text-amber-950');
+          break;
+        case 'theme-ocean':
+          app.classList.add('bg-cyan-50', 'text-slate-800');
+          break;
+        case 'theme-neon':
+          app.classList.add('bg-slate-950', 'text-indigo-100');
+          break;
+        case 'theme-classic':
+        default:
+          app.classList.add('bg-amber-50', 'text-slate-800');
+          break;
+      }
+
+      showToast("Tema berhasil diubah!");
+    }
+
+    // Update Preview DOM elements
+    function updatePreview() {
+      const isWedding = appData.eventType === 'wedding';
+
+      // Title & Subtitles
+      document.getElementById('view-cover-subtitle').textContent = isWedding ? "UNDANGAN PERNIKAHAN" : "UNDANGAN KHITANAN";
+      const namesCombo = isWedding ? `${appData.p1Nick} & ${appData.p2Nick}` : appData.p1Nick;
+      document.getElementById('view-cover-title').textContent = namesCombo;
+      document.getElementById('view-main-title').textContent = namesCombo;
+      document.getElementById('view-footer-names').textContent = namesCombo;
+      document.getElementById('view-header-sub').textContent = appData.title;
+
+      // Images
+      document.getElementById('view-cover-img').src = appData.p1Photo || 'https://placehold.co/300';
+      document.getElementById('view-p1-img').src = appData.p1Photo || 'https://placehold.co/300';
+      document.getElementById('view-p2-img').src = appData.p2Photo || 'https://placehold.co/300';
+
+      // Names & Info
+      document.getElementById('view-p1-name').textContent = appData.p1Name;
+      document.getElementById('view-p1-parents').textContent = appData.p1Parents;
+      
+      const p2BoxView = document.getElementById('view-p2-box');
+      const ampersandView = document.getElementById('view-ampersand');
+
+      if (isWedding) {
+        p2BoxView.classList.remove('hidden');
+        ampersandView.classList.remove('hidden');
+        document.getElementById('view-p2-name').textContent = appData.p2Name;
+        document.getElementById('view-p2-parents').textContent = appData.p2Parents;
+        document.getElementById('view-event1-title').textContent = "Akad Nikah";
+      } else {
+        p2BoxView.classList.add('hidden');
+        ampersandView.classList.add('hidden');
+        document.getElementById('view-event1-title').textContent = "Syukuran Khitan";
+      }
+
+      // Format Date string
+      if (appData.mainDate) {
+        const d = new Date(appData.mainDate);
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('view-main-date-str').textContent = d.toLocaleDateString('id-ID', options).toUpperCase();
+      }
+
+      // Event Locations
+      document.getElementById('view-event1-time').textContent = appData.mainDate ? new Date(appData.mainDate).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) + " WIB" : "";
+      document.getElementById('view-event1-place').textContent = appData.mainPlace;
+      document.getElementById('view-event1-address').textContent = appData.mainAddress;
+      document.getElementById('view-event2-time').textContent = appData.resepsiTime;
+      document.getElementById('view-maps-btn').href = appData.mapsUrl;
+
+      // Quote & Bank
+      document.getElementById('view-quote').textContent = appData.quote;
+      document.getElementById('view-bank-name').textContent = appData.bankName;
+      document.getElementById('view-bank-no').textContent = appData.bankNo;
+      document.getElementById('view-bank-holder').textContent = `a.n ${appData.bankHolder}`;
+
+      // Audio Source Update
+      const audioSource = document.getElementById('audio-source');
+      if (audioSource.src !== appData.bgmUrl) {
+        audioSource.src = appData.bgmUrl;
+        document.getElementById('audio-player').load();
+      }
+
+      startCountdown();
+    }
+
+    // Countdown Logic
+    function startCountdown() {
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      const targetDate = new Date(appData.mainDate).getTime();
+
+      countdownInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const diff = targetDate - now;
+
+        if (diff < 0) {
+          document.getElementById('cd-days').textContent = '00';
+          document.getElementById('cd-hours').textContent = '00';
+          document.getElementById('cd-mins').textContent = '00';
+          document.getElementById('cd-secs').textContent = '00';
+          clearInterval(countdownInterval);
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
+        document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('cd-mins').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('cd-secs').textContent = String(seconds).padStart(2, '0');
+      }, 1000);
+    }
+
+    // Cover Invitation Interaction
+    function openInvitation() {
+      const cover = document.getElementById('sec-cover');
+      cover.style.transform = 'translateY(-100%)';
+      cover.style.opacity = '0';
+      
+      // Show Music Floating Button & Play Audio
+      document.getElementById('btn-music').classList.remove('hidden');
+      toggleAudio(true);
+    }
+
+    // Audio Controls inside Preview Screen
+    function toggleAudio(forcePlay = false) {
+      const audio = document.getElementById('audio-player');
+      const btn = document.getElementById('btn-music');
+
+      if (forcePlay || audio.paused) {
+        audio.play().then(() => {
+          isAudioPlaying = true;
+          btn.classList.add('animate-spin');
+        }).catch(e => console.log("Audio autoplay restricted:", e));
+      } else {
+        audio.pause();
+        isAudioPlaying = false;
+        btn.classList.remove('animate-spin');
+      }
+    }
+
+    // Guestbook submission & WhatsApp redirection
+    function submitGuestBook(e) {
+      e.preventDefault();
+      const name = document.getElementById('guest-name').value;
+      const status = document.getElementById('guest-status').value;
+      const msg = document.getElementById('guest-msg').value;
+
+      if (!name || !msg) return;
+
+      // Add wish to UI list
+      const list = document.getElementById('wishes-list');
+      const item = document.createElement('div');
+      item.className = "bg-slate-50 p-2.5 rounded-lg border text-xs";
+      const isHadir = status === 'Hadir';
+      item.innerHTML = `
+        <div class="flex justify-between font-bold text-slate-700">
+          <span>${escapeHtml(name)}</span>
+          <span class="text-[10px] ${isHadir ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-slate-500 bg-slate-100 border-slate-200'} px-1.5 py-0.5 rounded border">${escapeHtml(status)}</span>
+        </div>
+        <p class="text-slate-600 text-[11px] mt-1">${escapeHtml(msg)}</p>
+      `;
+      list.prepend(item);
+
+      // Reset Form
+      document.getElementById('guest-name').value = '';
+      document.getElementById('guest-msg').value = '';
+
+      showToast("Ucapan tersimpan!");
+
+      // Redirect to WhatsApp if number exists
+      if (appData.waNumber) {
+        let cleanPhone = appData.waNumber.replace(/[^0-9]/g, '');
+        if (cleanPhone.startsWith('0')) {
+          cleanPhone = '62' + cleanPhone.slice(1);
+        }
+        
+        const titleEvent = appData.eventType === 'wedding' ? 'Pernikahan' : 'Khitanan';
+        const names = appData.eventType === 'wedding' ? `${appData.p1Nick} & ${appData.p2Nick}` : appData.p1Nick;
+        const textWA = `*Konfirmasi Kehadiran & Ucapan Undangan ${titleEvent} ${names}*\n\n` +
+                       `*Nama:* ${name}\n` +
+                       `*Status Kehadiran:* ${status}\n` +
+                       `*Ucapan & Doa:*\n"${msg}"`;
+
+        const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(textWA)}`;
+        window.open(waUrl, '_blank');
+      }
+    }
+
+    // Copy Bank Account Number
+    function copyBankAcc() {
+      const bankNo = appData.bankNo;
+      if (!bankNo) return;
+      
+      const tempInput = document.createElement('input');
+      tempInput.value = bankNo;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+
+      showToast("Nomor rekening berhasil disalin!");
+    }
+
+    // Toast Notification helper
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.textContent = message;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    // Helper HTML escape for safety
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+
+    // Single File Export Handler
+    document.getElementById('btnExport').addEventListener('click', function() {
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Undangan_${appData.eventType}_${appData.p1Nick}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("File HTML undangan berhasil diunduh!");
+    });
+  </script>
+</body>
+</html>
